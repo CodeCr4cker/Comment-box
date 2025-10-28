@@ -100,6 +100,10 @@
             box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
         }
 
+        .btn-comment:active {
+            transform: translateY(0);
+        }
+
         .btn-logout {
             background: #ff4757;
             color: white;
@@ -142,11 +146,15 @@
             width: 100%;
             height: 100%;
             background: rgba(0, 0, 0, 0.5);
-            display: flex;
+            display: none;
             align-items: center;
             justify-content: center;
             z-index: 1000;
             animation: fadeIn 0.3s ease;
+        }
+
+        .modal-overlay.show {
+            display: flex;
         }
 
         @keyframes fadeIn {
@@ -233,6 +241,11 @@
             margin-top: 15px;
             border-left: 4px solid #d32f2f;
             font-size: 14px;
+            display: none;
+        }
+
+        .error-message.show {
+            display: block;
         }
 
         .comments-list {
@@ -317,7 +330,7 @@
             color: #667eea;
         }
 
-        .hidden {
+        .hide {
             display: none;
         }
     </style>
@@ -330,7 +343,7 @@
         </div>
 
         <div class="comment-section">
-            <div id="userInfoSection" class="hidden">
+            <div id="userInfoSection" class="hide">
                 <div class="user-info-bar">
                     <div class="user-details">
                         <div class="user-avatar" id="userAvatar"></div>
@@ -351,7 +364,7 @@
     </div>
 
     <!-- Login Modal -->
-    <div id="loginModal" class="modal-overlay hidden">
+    <div id="loginModal" class="modal-overlay">
         <div class="modal-content">
             <h2 class="modal-title">🔐 Login to Comment</h2>
             <div class="form-group">
@@ -364,12 +377,12 @@
             </div>
             <button class="btn btn-submit" id="loginBtn">Login</button>
             <button class="btn btn-cancel" id="cancelLoginBtn">Cancel</button>
-            <div id="loginError" class="error-message hidden"></div>
+            <div id="loginError" class="error-message"></div>
         </div>
     </div>
 
     <!-- Comment Modal -->
-    <div id="commentModal" class="modal-overlay hidden">
+    <div id="commentModal" class="modal-overlay">
         <div class="modal-content">
             <h2 class="modal-title">✍️ Write Your Comment</h2>
             <textarea 
@@ -379,16 +392,15 @@
             ></textarea>
             <button class="btn btn-submit" id="submitCommentBtn">Post Comment</button>
             <button class="btn btn-cancel" id="cancelCommentBtn">Cancel</button>
-            <div id="commentError" class="error-message hidden"></div>
+            <div id="commentError" class="error-message"></div>
         </div>
     </div>
 
-    <script type="module">
-        // Import Firebase modules from CDN
-        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
-        import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
-        import { getDatabase, ref, push, onValue, serverTimestamp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js';
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
 
+    <script>
         // Firebase configuration
         const firebaseConfig = {
             apiKey: "AIzaSyCn9wRew8WpY2Tyw9BxBVgKjH5WNfOw3s4",
@@ -402,9 +414,9 @@
         };
 
         // Initialize Firebase
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const database = getDatabase(app);
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const database = firebase.database();
 
         // DOM elements
         const commentBtn = document.getElementById('commentBtn');
@@ -428,7 +440,7 @@
         let currentUser = null;
 
         // Auth state observer
-        onAuthStateChanged(auth, (user) => {
+        auth.onAuthStateChanged((user) => {
             if (user) {
                 currentUser = user;
                 showUserInfo(user);
@@ -439,17 +451,17 @@
         });
 
         // Comment button click
-        commentBtn.addEventListener('click', () => {
+        commentBtn.onclick = function() {
             if (currentUser) {
                 openCommentModal();
             } else {
                 openLoginModal();
             }
-        });
+        };
 
         // Open login modal
         function openLoginModal() {
-            loginModal.classList.remove('hidden');
+            loginModal.classList.add('show');
             emailInput.value = '';
             passwordInput.value = '';
             hideError(loginError);
@@ -457,12 +469,12 @@
 
         // Close login modal
         function closeLoginModal() {
-            loginModal.classList.add('hidden');
+            loginModal.classList.remove('show');
         }
 
         // Open comment modal
         function openCommentModal() {
-            commentModal.classList.remove('hidden');
+            commentModal.classList.add('show');
             commentInput.value = '';
             hideError(commentError);
             commentInput.focus();
@@ -470,23 +482,23 @@
 
         // Close comment modal
         function closeCommentModal() {
-            commentModal.classList.add('hidden');
+            commentModal.classList.remove('show');
         }
 
         // Cancel buttons
-        cancelLoginBtn.addEventListener('click', closeLoginModal);
-        cancelCommentBtn.addEventListener('click', closeCommentModal);
+        cancelLoginBtn.onclick = closeLoginModal;
+        cancelCommentBtn.onclick = closeCommentModal;
 
         // Close modals on overlay click
-        loginModal.addEventListener('click', (e) => {
+        loginModal.onclick = function(e) {
             if (e.target === loginModal) closeLoginModal();
-        });
-        commentModal.addEventListener('click', (e) => {
+        };
+        commentModal.onclick = function(e) {
             if (e.target === commentModal) closeCommentModal();
-        });
+        };
 
         // Login function
-        loginBtn.addEventListener('click', async () => {
+        loginBtn.onclick = async function() {
             const email = emailInput.value.trim();
             const password = passwordInput.value;
 
@@ -496,7 +508,7 @@
             }
 
             try {
-                await signInWithEmailAndPassword(auth, email, password);
+                await auth.signInWithEmailAndPassword(email, password);
                 closeLoginModal();
                 openCommentModal();
             } catch (error) {
@@ -514,15 +526,15 @@
                 }
                 showError(loginError, errorMsg);
             }
-        });
+        };
 
         // Allow Enter key for login
-        passwordInput.addEventListener('keypress', (e) => {
+        passwordInput.onkeypress = function(e) {
             if (e.key === 'Enter') loginBtn.click();
-        });
+        };
 
         // Submit comment
-        submitCommentBtn.addEventListener('click', async () => {
+        submitCommentBtn.onclick = async function() {
             const commentText = commentInput.value.trim();
             
             if (!commentText) {
@@ -537,26 +549,25 @@
 
             try {
                 const username = currentUser.email.split('@')[0];
-                const commentsRef = ref(database, 'comments');
-                await push(commentsRef, {
+                await database.ref('comments').push({
                     text: commentText,
                     author: username,
                     authorId: currentUser.uid,
-                    timestamp: serverTimestamp()
+                    timestamp: firebase.database.ServerValue.TIMESTAMP
                 });
 
                 closeCommentModal();
             } catch (error) {
                 showError(commentError, 'Failed to post comment: ' + error.message);
             }
-        });
+        };
 
         // Logout
-        logoutBtn.addEventListener('click', () => {
-            signOut(auth).catch((error) => {
+        logoutBtn.onclick = function() {
+            auth.signOut().catch((error) => {
                 alert('Logout failed: ' + error.message);
             });
-        });
+        };
 
         // Show user info
         function showUserInfo(user) {
@@ -565,28 +576,27 @@
             
             userAvatar.textContent = initial;
             userName.textContent = username;
-            userInfoSection.classList.remove('hidden');
+            userInfoSection.classList.remove('hide');
         }
 
         // Hide user info
         function hideUserInfo() {
-            userInfoSection.classList.add('hidden');
+            userInfoSection.classList.add('hide');
         }
 
         // Show error
         function showError(element, message) {
             element.textContent = message;
-            element.classList.remove('hidden');
+            element.classList.add('show');
         }
 
         // Hide error
         function hideError(element) {
-            element.classList.add('hidden');
+            element.classList.remove('show');
         }
 
         // Load comments
-        const commentsRef = ref(database, 'comments');
-        onValue(commentsRef, (snapshot) => {
+        database.ref('comments').on('value', (snapshot) => {
             const comments = [];
             snapshot.forEach((childSnapshot) => {
                 comments.push({
