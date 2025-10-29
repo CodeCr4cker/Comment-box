@@ -1,0 +1,1107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Comment Box - Enhanced</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2em;
+            margin-bottom: 10px;
+        }
+
+        .stats-bar {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin-top: 15px;
+            font-size: 0.9em;
+        }
+
+        .stat-item {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .comment-section {
+            padding: 30px;
+            border-bottom: 2px solid #f0f0f0;
+        }
+
+        .user-info-bar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: #f8f9fa;
+            padding: 15px 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+
+        .user-details {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 18px;
+            font-weight: bold;
+        }
+
+        .user-name {
+            font-weight: 600;
+            color: #333;
+        }
+
+        .btn {
+            padding: 12px 30px;
+            border: none;
+            border-radius: 25px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-comment {
+            background: #667eea;
+            color: white;
+            width: 100%;
+        }
+
+        .btn-comment:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-comment:active {
+            transform: translateY(0);
+        }
+
+        .btn-logout {
+            background: #ff4757;
+            color: white;
+            padding: 10px 25px;
+            font-size: 14px;
+        }
+
+        .btn-logout:hover {
+            background: #ee3344;
+        }
+
+        .btn-submit {
+            background: #667eea;
+            color: white;
+            width: 100%;
+            margin-top: 15px;
+        }
+
+        .btn-submit:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-submit:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn-cancel {
+            background: #95a5a6;
+            color: white;
+            width: 100%;
+            margin-top: 10px;
+        }
+
+        .btn-cancel:hover {
+            background: #7f8c8d;
+        }
+
+        .btn-register {
+            background: #2ecc71;
+            color: white;
+            width: 100%;
+            margin-top: 10px;
+        }
+
+        .btn-register:hover {
+            background: #27ae60;
+        }
+
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .modal-overlay.show {
+            display: flex;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .modal-content {
+            background: white;
+            padding: 40px;
+            border-radius: 15px;
+            max-width: 450px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+            animation: slideUp 0.3s ease;
+        }
+
+        @keyframes slideUp {
+            from { 
+                opacity: 0;
+                transform: translateY(50px);
+            }
+            to { 
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .modal-title {
+            font-size: 1.8em;
+            color: #333;
+            margin-bottom: 25px;
+            text-align: center;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+            text-align: left;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: 600;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .comment-textarea {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 16px;
+            font-family: inherit;
+            resize: vertical;
+            min-height: 120px;
+            transition: border-color 0.3s ease;
+        }
+
+        .comment-textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .char-counter {
+            text-align: right;
+            color: #999;
+            font-size: 0.9em;
+            margin-top: 5px;
+        }
+
+        .char-counter.warning {
+            color: #ff4757;
+        }
+
+        .error-message, .success-message {
+            padding: 12px 15px;
+            border-radius: 8px;
+            margin-top: 15px;
+            font-size: 14px;
+            display: none;
+        }
+
+        .error-message {
+            background: #ffe0e0;
+            color: #d32f2f;
+            border-left: 4px solid #d32f2f;
+        }
+
+        .success-message {
+            background: #e0ffe0;
+            color: #2e7d32;
+            border-left: 4px solid #2e7d32;
+        }
+
+        .error-message.show, .success-message.show {
+            display: block;
+        }
+
+        .filter-bar {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .filter-btn {
+            padding: 8px 20px;
+            border: 2px solid #667eea;
+            background: white;
+            color: #667eea;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+
+        .filter-btn.active {
+            background: #667eea;
+            color: white;
+        }
+
+        .filter-btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .search-box {
+            flex: 1;
+            min-width: 200px;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 10px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 20px;
+            font-size: 14px;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .comments-list {
+            padding: 30px;
+        }
+
+        .section-title {
+            font-size: 1.5em;
+            color: #333;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #667eea;
+        }
+
+        .comment-item {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            border-left: 4px solid #667eea;
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .comment-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        .comment-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+        }
+
+        .comment-author {
+            font-weight: 600;
+            color: #667eea;
+        }
+
+        .comment-time {
+            color: #999;
+            font-size: 0.9em;
+            margin-left: auto;
+        }
+
+        .comment-text {
+            color: #333;
+            line-height: 1.6;
+            margin-left: 50px;
+            word-wrap: break-word;
+            margin-bottom: 10px;
+        }
+
+        .comment-actions {
+            display: flex;
+            gap: 15px;
+            margin-left: 50px;
+            align-items: center;
+        }
+
+        .action-btn {
+            background: none;
+            border: none;
+            color: #999;
+            cursor: pointer;
+            font-size: 0.9em;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            transition: color 0.3s;
+        }
+
+        .action-btn:hover {
+            color: #667eea;
+        }
+
+        .action-btn.liked {
+            color: #ff4757;
+        }
+
+        .no-comments {
+            text-align: center;
+            color: #999;
+            padding: 40px;
+            font-style: italic;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 20px;
+            color: #667eea;
+        }
+
+        .hide {
+            display: none;
+        }
+
+        .tab-switch {
+            text-align: center;
+            margin-top: 15px;
+            color: #667eea;
+            cursor: pointer;
+            font-size: 0.9em;
+        }
+
+        .tab-switch:hover {
+            text-decoration: underline;
+        }
+
+        @media (max-width: 600px) {
+            .user-info-bar {
+                flex-direction: column;
+                gap: 15px;
+            }
+            
+            .filter-bar {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>💬 Comment Box</h1>
+            <p>Share your thoughts with the community</p>
+            <div class="stats-bar">
+                <div class="stat-item">
+                    <span>💬</span>
+                    <span id="totalComments">0</span>
+                    <span>Comments</span>
+                </div>
+                <div class="stat-item">
+                    <span>👥</span>
+                    <span id="totalUsers">0</span>
+                    <span>Contributors</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="comment-section">
+            <div id="userInfoSection" class="hide">
+                <div class="user-info-bar">
+                    <div class="user-details">
+                        <div class="user-avatar" id="userAvatar"></div>
+                        <span class="user-name" id="userName"></span>
+                    </div>
+                    <button class="btn btn-logout" id="logoutBtn">Logout</button>
+                </div>
+            </div>
+            <button class="btn btn-comment" id="commentBtn">💬 Add Comment</button>
+        </div>
+
+        <div class="comments-list">
+            <div class="section-title">Comments</div>
+            
+            <div class="filter-bar" id="filterBar">
+                <button class="filter-btn active" data-filter="newest">🕒 Newest</button>
+                <button class="filter-btn" data-filter="oldest">📅 Oldest</button>
+                <button class="filter-btn" data-filter="popular">🔥 Popular</button>
+                <div class="search-box">
+                    <input type="text" class="search-input" id="searchInput" placeholder="🔍 Search comments...">
+                </div>
+            </div>
+
+            <div id="commentsList">
+                <div class="loading">Loading comments...</div>
+            </div>
+        </div>
+    </div>
+
+    <div id="loginModal" class="modal-overlay">
+        <div class="modal-content">
+            <h2 class="modal-title">🔐 Login to Comment</h2>
+            <div class="form-group">
+                <label for="emailInput">Email</label>
+                <input type="email" id="emailInput" class="form-input" placeholder="Enter your email">
+            </div>
+            <div class="form-group">
+                <label for="passwordInput">Password</label>
+                <input type="password" id="passwordInput" class="form-input" placeholder="Enter your password">
+            </div>
+            <button class="btn btn-submit" id="loginBtn">Login</button>
+            <button class="btn btn-register" id="showRegisterBtn">Create New Account</button>
+            <button class="btn btn-cancel" id="cancelLoginBtn">Cancel</button>
+            <div id="loginError" class="error-message"></div>
+        </div>
+    </div>
+
+    <div id="registerModal" class="modal-overlay">
+        <div class="modal-content">
+            <h2 class="modal-title">📝 Create Account</h2>
+            <div class="form-group">
+                <label for="regEmailInput">Email</label>
+                <input type="email" id="regEmailInput" class="form-input" placeholder="Enter your email">
+            </div>
+            <div class="form-group">
+                <label for="regPasswordInput">Password</label>
+                <input type="password" id="regPasswordInput" class="form-input" placeholder="Minimum 6 characters">
+            </div>
+            <div class="form-group">
+                <label for="regConfirmPasswordInput">Confirm Password</label>
+                <input type="password" id="regConfirmPasswordInput" class="form-input" placeholder="Re-enter password">
+            </div>
+            <button class="btn btn-submit" id="registerBtn">Create Account</button>
+            <button class="btn btn-cancel" id="cancelRegisterBtn">Cancel</button>
+            <div id="registerError" class="error-message"></div>
+            <div id="registerSuccess" class="success-message"></div>
+            <div class="tab-switch" id="backToLoginBtn">Already have an account? Login</div>
+        </div>
+    </div>
+
+    <div id="commentModal" class="modal-overlay">
+        <div class="modal-content">
+            <h2 class="modal-title">✍️ Write Your Comment</h2>
+            <textarea class="comment-textarea" id="commentInput" placeholder="Share your thoughts..." maxlength="500"></textarea>
+            <div class="char-counter" id="charCounter">0 / 500</div>
+            <button class="btn btn-submit" id="submitCommentBtn">Post Comment</button>
+            <button class="btn btn-cancel" id="cancelCommentBtn">Cancel</button>
+            <div id="commentError" class="error-message"></div>
+        </div>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
+
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyDr_reHnwMBlZ8HnhT-Ae9Rl4wwvOG2nuk",
+            authDomain: "chat-67712.firebaseapp.com",
+            databaseURL: "https://chat-67712-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "chat-67712",
+            storageBucket: "chat-67712.firebasestorage.app",
+            messagingSenderId: "666294677963",
+            appId: "1:666294677963:web:42b547e2dd362e7847464e",
+            measurementId: "G-SV83LJ44YJ"
+        };
+
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const database = firebase.database();
+
+        const commentBtn = document.getElementById('commentBtn');
+        const loginModal = document.getElementById('loginModal');
+        const registerModal = document.getElementById('registerModal');
+        const commentModal = document.getElementById('commentModal');
+        const emailInput = document.getElementById('emailInput');
+        const passwordInput = document.getElementById('passwordInput');
+        const loginBtn = document.getElementById('loginBtn');
+        const cancelLoginBtn = document.getElementById('cancelLoginBtn');
+        const showRegisterBtn = document.getElementById('showRegisterBtn');
+        const backToLoginBtn = document.getElementById('backToLoginBtn');
+        const loginError = document.getElementById('loginError');
+        const regEmailInput = document.getElementById('regEmailInput');
+        const regPasswordInput = document.getElementById('regPasswordInput');
+        const regConfirmPasswordInput = document.getElementById('regConfirmPasswordInput');
+        const registerBtn = document.getElementById('registerBtn');
+        const cancelRegisterBtn = document.getElementById('cancelRegisterBtn');
+        const registerError = document.getElementById('registerError');
+        const registerSuccess = document.getElementById('registerSuccess');
+        const commentInput = document.getElementById('commentInput');
+        const charCounter = document.getElementById('charCounter');
+        const submitCommentBtn = document.getElementById('submitCommentBtn');
+        const cancelCommentBtn = document.getElementById('cancelCommentBtn');
+        const commentError = document.getElementById('commentError');
+        const commentsList = document.getElementById('commentsList');
+        const userInfoSection = document.getElementById('userInfoSection');
+        const userAvatar = document.getElementById('userAvatar');
+        const userName = document.getElementById('userName');
+        const logoutBtn = document.getElementById('logoutBtn');
+        const searchInput = document.getElementById('searchInput');
+        const totalComments = document.getElementById('totalComments');
+        const totalUsers = document.getElementById('totalUsers');
+        const filterBar = document.getElementById('filterBar');
+
+        let currentUser = null;
+        let allComments = [];
+        let currentFilter = 'newest';
+        let currentSearchTerm = '';
+        let editingCommentId = null;
+
+        function showError(el, message) {
+            if (!el) return;
+            el.textContent = message;
+            el.classList.add('show');
+        }
+
+        function showSuccess(el, message) {
+            if (!el) return;
+            el.textContent = message;
+            el.classList.add('show');
+        }
+
+        function hideError(el) {
+            if (!el) return;
+            el.textContent = '';
+            el.classList.remove('show');
+        }
+
+        auth.onAuthStateChanged((user) => {
+            if (user) {
+                currentUser = user;
+                showUserInfo(user);
+            } else {
+                currentUser = null;
+                hideUserInfo();
+            }
+        });
+
+        function showUserInfo(user) {
+            if (!user) return;
+            userInfoSection.classList.remove('hide');
+            const username = user.displayName || (user.email ? user.email.split('@')[0] : 'User');
+            const initial = username.charAt(0).toUpperCase();
+            userAvatar.textContent = initial;
+            userName.textContent = username;
+        }
+
+        function hideUserInfo() {
+            userInfoSection.classList.add('hide');
+        }
+
+        commentBtn.onclick = function() {
+            if (auth.currentUser) {
+                openCommentModal();
+            } else {
+                openLoginModal();
+            }
+        };
+
+        function openLoginModal() {
+            loginModal.classList.add('show');
+            emailInput.value = '';
+            passwordInput.value = '';
+            hideError(loginError);
+        }
+
+        function closeLoginModal() {
+            loginModal.classList.remove('show');
+        }
+
+        function openRegisterModal() {
+            registerModal.classList.add('show');
+            regEmailInput.value = '';
+            regPasswordInput.value = '';
+            regConfirmPasswordInput.value = '';
+            hideError(registerError);
+            hideError(registerSuccess);
+        }
+
+        function closeRegisterModal() {
+            registerModal.classList.remove('show');
+        }
+
+        function openCommentModal(commentId = null, commentText = '') {
+            commentModal.classList.add('show');
+            commentInput.value = commentText;
+            editingCommentId = commentId;
+            updateCharCounter();
+            hideError(commentError);
+            commentInput.focus();
+            
+            const modalTitle = commentModal.querySelector('.modal-title');
+            if (commentId) {
+                modalTitle.textContent = '✍️ Edit Your Comment';
+                submitCommentBtn.textContent = 'Update Comment';
+            } else {
+                modalTitle.textContent = '✍️ Write Your Comment';
+                submitCommentBtn.textContent = 'Post Comment';
+            }
+        }
+
+        function closeCommentModal() {
+            commentModal.classList.remove('show');
+            editingCommentId = null;
+            commentInput.value = '';
+            updateCharCounter();
+        }
+
+        showRegisterBtn.onclick = () => {
+            closeLoginModal();
+            openRegisterModal();
+        };
+
+        backToLoginBtn.onclick = () => {
+            closeRegisterModal();
+            openLoginModal();
+        };
+
+        cancelLoginBtn.onclick = closeLoginModal;
+        cancelRegisterBtn.onclick = closeRegisterModal;
+        cancelCommentBtn.onclick = closeCommentModal;
+
+        loginModal.onclick = (e) => {
+            if (e.target === loginModal) closeLoginModal();
+        };
+        registerModal.onclick = (e) => {
+            if (e.target === registerModal) closeRegisterModal();
+        };
+        commentModal.onclick = (e) => {
+            if (e.target === commentModal) closeCommentModal();
+        };
+
+        commentInput.oninput = updateCharCounter;
+
+        function updateCharCounter() {
+            const length = commentInput.value.length;
+            charCounter.textContent = `${length} / 500`;
+            charCounter.classList.toggle('warning', length > 450);
+        }
+
+        registerBtn.onclick = async function() {
+            const email = regEmailInput.value.trim();
+            const password = regPasswordInput.value;
+            const confirmPassword = regConfirmPasswordInput.value;
+
+            hideError(registerError);
+            hideError(registerSuccess);
+
+            if (!email || !password || !confirmPassword) {
+                showError(registerError, 'Please fill in all fields');
+                return;
+            }
+
+            if (password.length < 6) {
+                showError(registerError, 'Password must be at least 6 characters');
+                return;
+            }
+
+            if (password !== confirmPassword) {
+                showError(registerError, 'Passwords do not match');
+                return;
+            }
+
+            registerBtn.disabled = true;
+            registerBtn.textContent = 'Creating Account...';
+
+            try {
+                await auth.createUserWithEmailAndPassword(email, password);
+                showSuccess(registerSuccess, 'Account created successfully!');
+                setTimeout(() => {
+                    closeRegisterModal();
+                    openCommentModal();
+                }, 800);
+            } catch (error) {
+                let errorMsg = 'Registration failed. ';
+                if (error.code === 'auth/email-already-in-use') {
+                    errorMsg += 'This email is already registered.';
+                } else if (error.code === 'auth/invalid-email') {
+                    errorMsg += 'Invalid email address.';
+                } else if (error.code === 'auth/weak-password') {
+                    errorMsg += 'Password is too weak.';
+                } else {
+                    errorMsg += error.message;
+                }
+                showError(registerError, errorMsg);
+            } finally {
+                registerBtn.disabled = false;
+                registerBtn.textContent = 'Create Account';
+            }
+        };
+
+        loginBtn.onclick = async function() {
+            const email = emailInput.value.trim();
+            const password = passwordInput.value;
+
+            if (!email || !password) {
+                showError(loginError, 'Please enter both email and password');
+                return;
+            }
+
+            loginBtn.disabled = true;
+            loginBtn.textContent = 'Logging in...';
+
+            try {
+                await auth.signInWithEmailAndPassword(email, password);
+                closeLoginModal();
+                openCommentModal();
+            } catch (error) {
+                let errorMsg = 'Login failed. ';
+                if (error.code === 'auth/user-not-found' || error.code === 'auth/wrong-password' || error.code === 'auth/invalid-credential') {
+                    errorMsg += 'Invalid email or password.';
+                } else if (error.code === 'auth/invalid-email') {
+                    errorMsg += 'Invalid email address.';
+                } else {
+                    errorMsg += error.message;
+                }
+                showError(loginError, errorMsg);
+            } finally {
+                loginBtn.disabled = false;
+                loginBtn.textContent = 'Login';
+            }
+        };
+
+        passwordInput.onkeypress = (e) => {
+            if (e.key === 'Enter') loginBtn.click();
+        };
+
+        regConfirmPasswordInput.onkeypress = (e) => {
+            if (e.key === 'Enter') registerBtn.click();
+        };
+
+        submitCommentBtn.onclick = async function() {
+            const commentText = commentInput.value.trim();
+            
+            if (!commentText) {
+                showError(commentError, 'Please write a comment');
+                return;
+            }
+
+            const user = auth.currentUser;
+            if (!user) {
+                showError(commentError, 'Please login to comment');
+                return;
+            }
+
+            submitCommentBtn.disabled = true;
+            submitCommentBtn.textContent = editingCommentId ? 'Updating...' : 'Posting...';
+
+            try {
+                const username = user.displayName || user.email.split('@')[0];
+                
+                if (editingCommentId) {
+                    const snapshot = await database.ref(`comments/${editingCommentId}/authorId`).once('value');
+                    if (snapshot.exists() && snapshot.val() === user.uid) {
+                        await database.ref(`comments/${editingCommentId}`).update({
+                            text: commentText,
+                            edited: true,
+                            editedAt: firebase.database.ServerValue.TIMESTAMP
+                        });
+                        closeCommentModal();
+                    } else {
+                        showError(commentError, 'You are not allowed to edit this comment.');
+                    }
+                } else {
+                    await database.ref('comments').push({
+                        text: commentText,
+                        author: username,
+                        authorId: user.uid,
+                        timestamp: firebase.database.ServerValue.TIMESTAMP,
+                        likes: 0,
+                        likedBy: {}
+                    });
+                    closeCommentModal();
+                }
+            } catch (error) {
+                showError(commentError, 'Failed to post comment: ' + error.message);
+            } finally {
+                submitCommentBtn.disabled = false;
+                submitCommentBtn.textContent = editingCommentId ? 'Update Comment' : 'Post Comment';
+            }
+        };
+
+        window.deleteComment = async function(commentId) {
+            if (!confirm('Are you sure you want to delete this comment?')) return;
+            
+            const user = auth.currentUser;
+            if (!user) {
+                openLoginModal();
+                return;
+            }
+
+            try {
+                const snapshot = await database.ref(`comments/${commentId}`).once('value');
+                const comment = snapshot.val();
+                if (!comment) {
+                    alert('Comment not found.');
+                    return;
+                }
+                if (comment.authorId !== user.uid) {
+                    alert('You can only delete your own comments.');
+                    return;
+                }
+                await database.ref(`comments/${commentId}`).remove();
+            } catch (error) {
+                alert('Failed to delete comment: ' + error.message);
+            }
+        };
+
+        window.editComment = async function(commentId, commentText) {
+            const user = auth.currentUser;
+            if (!user) {
+                openLoginModal();
+                return;
+            }
+
+            try {
+                const snapshot = await database.ref(`comments/${commentId}/authorId`).once('value');
+                if (snapshot.exists() && snapshot.val() === user.uid) {
+                    openCommentModal(commentId, commentText);
+                } else {
+                    alert('You can only edit your own comments.');
+                }
+            } catch (error) {
+                alert('Could not verify permission: ' + error.message);
+            }
+        };
+
+        window.toggleLike = async function(commentId) {
+            const user = auth.currentUser;
+            if (!user) {
+                openLoginModal();
+                return;
+            }
+
+            const likeRef = database.ref(`comments/${commentId}/likedBy/${user.uid}`);
+            try {
+                const snapshot = await likeRef.once('value');
+                
+                if (snapshot.exists()) {
+                    await likeRef.remove();
+                    await database.ref(`comments/${commentId}/likes`).transaction((likes) => {
+                        return (likes || 1) - 1;
+                    });
+                } else {
+                    await likeRef.set(true);
+                    await database.ref(`comments/${commentId}/likes`).transaction((likes) => {
+                        return (likes || 0) + 1;
+                    });
+                }
+            } catch (error) {
+                alert('Failed to toggle like: ' + error.message);
+            }
+        };
+
+        logoutBtn.onclick = function() {
+            auth.signOut().catch((error) => {
+                alert('Logout failed: ' + error.message);
+            });
+        };
+
+        database.ref('comments').on('value', (snapshot) => {
+            const comments = [];
+            snapshot.forEach(child => {
+                comments.push({ id: child.key, ...child.val() });
+            });
+
+            allComments = comments;
+            totalComments.textContent = comments.length;
+            const userIds = new Set(comments.map(c => c.authorId).filter(Boolean));
+            totalUsers.textContent = userIds.size;
+
+            renderComments();
+        }, (error) => {
+            console.error('Failed to read comments:', error);
+            commentsList.innerHTML = `<div class="error-message show">Failed to load comments: ${escapeHtml(error.message || error)}</div>`;
+        });
+
+        searchInput.addEventListener('input', (e) => {
+            currentSearchTerm = e.target.value.trim().toLowerCase();
+            renderComments();
+        });
+
+        filterBar.addEventListener('click', (e) => {
+            const btn = e.target.closest('.filter-btn');
+            if (!btn) return;
+            document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            currentFilter = btn.dataset.filter || 'newest';
+            renderComments();
+        });
+
+        function escapeHtml(str) {
+            if (str === undefined || str === null) return '';
+            return String(str)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#039;');
+        }
+
+        function renderComments() {
+            try {
+                let items = allComments.slice();
+
+                if (currentSearchTerm) {
+                    items = items.filter(c => {
+                        const text = (c.text || '').toLowerCase();
+                        const author = (c.author || '').toLowerCase();
+                        return text.includes(currentSearchTerm) || author.includes(currentSearchTerm);
+                    });
+                }
+
+                if (currentFilter === 'newest') {
+                    items.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
+                } else if (currentFilter === 'oldest') {
+                    items.sort((a, b) => (a.timestamp || 0) - (b.timestamp || 0));
+                } else if (currentFilter === 'popular') {
+                    items.sort((a, b) => (b.likes || 0) - (a.likes || 0));
+                }
+
+                if (items.length === 0) {
+                    commentsList.innerHTML = '<div class="no-comments">No comments yet. Be the first to comment!</div>';
+                    return;
+                }
+
+                const user = auth.currentUser;
+
+                commentsList.innerHTML = items.map(c => {
+                    const time = c.timestamp ? new Date(c.timestamp).toLocaleString() : '';
+                    const author = c.author || 'Anonymous';
+                    const safeText = escapeHtml(c.text || '');
+                    const avatarLetter = escapeHtml((author.charAt(0).toUpperCase()) || 'A');
+                    const isMine = user && c.authorId === user.uid;
+                    const likeCount = c.likes || 0;
+
+                    let likedClass = '';
+                    if (user && c.likedBy && c.likedBy[user.uid]) {
+                        likedClass = 'liked';
+                    }
+
+                    const safeTextForEdit = (c.text || '').replace(/\\/g, '\\\\').replace(/`/g, '\\`').replace(/\$/g, '\\);
+
+                    return `
+                        <div class="comment-item">
+                            <div class="comment-header">
+                                <div class="comment-avatar">${avatarLetter}</div>
+                                <div class="comment-author">${escapeHtml(author)}</div>
+                                <div class="comment-time">${escapeHtml(time)}</div>
+                            </div>
+                            <div class="comment-text">${safeText}${c.edited ? ' <em>(edited)</em>' : ''}</div>
+                            <div class="comment-actions">
+                                <button class="action-btn ${likedClass}" onclick="toggleLike('${escapeHtml(c.id)}')">
+                                    👍 ${likeCount}
+                                </button>
+                                ${isMine ? `
+                                    <button class="action-btn" onclick="editComment('${escapeHtml(c.id)}', \`${escapeHtml(safeTextForEdit)}\`)">Edit</button>
+                                    <button class="action-btn" onclick="deleteComment('${escapeHtml(c.id)}')">Delete</button>
+                                ` : ''}
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+            } catch (err) {
+                console.error('Render failed', err);
+                commentsList.innerHTML = `<div class="error-message show">Failed to render comments: ${escapeHtml(err.message || err)}</div>`;
+            }
+        }
+
+        renderComments();
